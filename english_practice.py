@@ -1,6 +1,7 @@
 import csv
 from random import choice
 from re import split
+import clipboard_monitor
 
 def get_data():
     with open('Words.csv', 'r', encoding = 'utf-8-sig') as file:

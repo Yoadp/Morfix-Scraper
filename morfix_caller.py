@@ -1,12 +1,14 @@
 import requests
 import bs4
-import win32clipboard
+#import win32clipboard
+from pandas import read_clipboard
 import time
-import msvcrt
-from win32ui import MessageBox
+#import msvcrt
+import sys
+import tty
+import termios
 import csv
 import platform
-from pyautogui import alert
 import os
 
 dictionary = {}
@@ -29,13 +31,11 @@ def show_messagebox(title, message):
 
 
 def get_paste_from_clipboard():
-    win32clipboard.OpenClipboard(0)
-    result = ''
+    result = read_clipboard()
     try:
-        result = win32clipboard.GetClipboardData()
+        result = read_clipboard
     except:
         result = ''
-    win32clipboard.CloseClipboard()
     return result
 
 
@@ -46,15 +46,27 @@ def check_in_csv(english_word):
     
     return None
 
+def getch():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    ch = ""
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-def main():
+    return ch
+
+def main_job():
     get_csv_file()
     print("The app is up and running...")
     print("Press q and enter at any time to stop the program.")
     english_word = get_paste_from_clipboard()
 
     while True:
-        if msvcrt.kbhit():
+        
+        if sys.stdin.read(1):
             if msvcrt.getwche() == "q":
                 break
         time.sleep(1.5)
@@ -89,6 +101,10 @@ def main():
             print(key + " -> " + value)
             writer.writerow([key,value])
 
+
+def main():
+    ch = getch()
+    print(f"User pressed: {ch}")  
 
 if __name__ == "__main__":
     main()
