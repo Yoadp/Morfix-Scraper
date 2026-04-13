@@ -1,9 +1,7 @@
 import requests
 import bs4
-#import win32clipboard
 from pandas import read_clipboard
 import time
-#import msvcrt
 import sys
 import tty
 import termios
@@ -12,32 +10,33 @@ import platform
 import os
 
 dictionary = {}
-
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
 
 csv_file = {}
 
 def get_csv_file():
     global csv_file
-    with open(os.getcwd() + '\\Words.csv', 'r', encoding = 'utf-8-sig') as file:
+    with open(os.getcwd() + '/Words.csv', 'r', encoding = 'utf-8-sig') as file:
         reader = csv.reader(file)
         for row in reader:
             csv_file[row[0]] = row[1]
 
 def show_messagebox(title, message):
-    if platform.system() == "Windows":
-        MessageBox(message, title)
-    else:
-        alert(text=message, title=title)
+    print(title, message)
+    # if platform.system() == "Windows":
+    #     MessageBox(message, title)
+    # else:
+    #     alert(text=message, title=title)
 
 
-def get_paste_from_clipboard():
-    result = read_clipboard()
+def get_clipboard():
     try:
-        result = read_clipboard
+        text = read_clipboard(sep='\\v', header=None).iloc[0, 0]
     except:
-        result = ''
-    return result
-
+        text = ''
+    return text
 
 def check_in_csv(english_word):
     global csv_file
@@ -62,23 +61,20 @@ def main_job():
     get_csv_file()
     print("The app is up and running...")
     print("Press q and enter at any time to stop the program.")
-    english_word = get_paste_from_clipboard()
+    english_word = get_clipboard()
+    print(english_word)
 
     while True:
-        
-        if sys.stdin.read(1):
-            if msvcrt.getwche() == "q":
-                break
         time.sleep(1.5)
-        if english_word != get_paste_from_clipboard():
-            english_word = get_paste_from_clipboard()
+        if english_word != get_clipboard():
+            english_word = get_clipboard()
             print(english_word)
         else:
             continue
         translated_word = check_in_csv(english_word)
         if not translated_word:
             try:
-                r = requests.get(f"https://www.morfix.co.il/{english_word}")
+                r = requests.get(f"https://www.morfix.co.il/{english_word}", headers=HEADERS)
             except ConnectionError:
                 print("Be aware that you arent connected to the network...")
                 show_messagebox("Error", "Be aware that you arent connected to the network...")
@@ -103,8 +99,7 @@ def main_job():
 
 
 def main():
-    ch = getch()
-    print(f"User pressed: {ch}")  
+    main_job()
 
 if __name__ == "__main__":
     main()
